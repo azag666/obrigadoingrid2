@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Pago</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ícones do Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tg: {
+                            blue: '#3390ec',
+                            hover: '#2c7ec9',
+                            bg: '#f4f6f8',
+                            text: '#222222',
+                            muted: '#707579'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f4f6f8;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .tg-input {
+            transition: all 0.2s ease;
+            border: 1.5px solid #e5e7eb;
+        }
+        .tg-input:focus {
+            border-color: #3390ec;
+            box-shadow: 0 0 0 3px rgba(51, 144, 236, 0.15);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .file-upload-wrapper:hover {
+            background-color: rgba(51, 144, 236, 0.04);
+        }
+    </style>
+
+    <!-- Meta Pixel Code -->
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        
+        // 1. CAPTURA DO NOME DO ANÚNCIO (Enviado pelo ManyChat na URL)
+        const urlParams = new URLSearchParams(window.location.search);
+        const adName = urlParams.get('adname') || 'organico';
+
+        // 2. INICIALIZA O PIXEL
+        fbq('init', '961466723085189');
+        fbq('track', 'PageView');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('payment-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const formContainer = document.getElementById('form-container');
+            const successContainer = document.getElementById('success-container');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Estado de Loading no botão
+                submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Procesando...';
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+
+                // Captura os valores
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const amount = parseFloat(document.getElementById('amount').value);
+                
+                // 3. Correspondência Avançada Pixel
+                fbq('init', '961466723085189', {
+                    em: email.toLowerCase().trim(),
+                    fn: name.split(' ')[0].toLowerCase().trim()
+                });
+
+                // 4. Dispara o evento de Purchase
+                if (amount > 0) {
+                    fbq('track', 'Purchase', {
+                        value: amount,
+                        currency: 'ARS',
+                        content_name: adName,
+                        content_category: 'Bot_Telegram'
+                    });
+                }
+
+                // 5. Transição para a mensagem de sucesso e redirecionamento final
+                setTimeout(() => {
+                    formContainer.classList.add('hidden');
+                    successContainer.classList.remove('hidden');
+                    successContainer.classList.add('flex', 'fade-in');
+
+                    // Redireciona automaticamente após 2.5 segundos para o Telegram
+                    setTimeout(() => {
+                        window.location.href = 'https://t.me/+W2YdZx24kGk5MjYx';
+                    }, 2500);
+
+                }, 1200);
+            });
+        });
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=902473605014744&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 text-tg-text">
+
+    <!-- Container Principal -->
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col relative border border-gray-100">
+        
+        <!-- Faixa azul superior sutil -->
+        <div class="h-2 bg-tg-blue w-full"></div>
+
+        <!-- Conteúdo do Formulário -->
+        <div id="form-container" class="p-6 sm:p-8 fade-in">
+            
+            <!-- Header Icon & Titles -->
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="w-16 h-16 bg-[#eaf3fc] rounded-full flex items-center justify-center mb-4 text-tg-blue">
+                    <i class="ph-fill ph-lock-key text-3xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight mb-2">Paso final para acceder</h1>
+                <p class="text-tg-muted text-[15px] leading-relaxed">
+                    Para liberar tu contenido exclusivo automáticamente, confirmá los datos de tu pago a continuación.
+                </p>
+            </div>
+
+            <!-- Formulario -->
+            <form id="payment-form" class="space-y-5">
+                
+                <div>
+                    <label for="name" class="block text-sm font-semibold text-gray-700 mb-1.5">Nombre completo</label>
+                    <input type="text" id="name" required placeholder="Ej: Juan Pérez" 
+                           class="w-full px-4 py-3 bg-gray-50 rounded-xl tg-input outline-none text-[15px] text-gray-800 placeholder-gray-400">
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">Correo electrónico</label>
+                    <input type="email" id="email" required placeholder="tu@email.com" 
+                           class="w-full px-4 py-3 bg-gray-50 rounded-xl tg-input outline-none text-[15px] text-gray-800 placeholder-gray-400">
+                </div>
+
+                <div>
+                    <label for="amount" class="block text-sm font-semibold text-gray-700 mb-1.5">Monto abonado (ARS)</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                        <input type="number" id="amount" required min="1" step="0.01" placeholder="0.00" 
+                               class="w-full pl-9 pr-4 py-3 bg-gray-50 rounded-xl tg-input outline-none text-[15px] text-gray-800 placeholder-gray-400">
+                    </div>
+                </div>
+
+                <div class="pt-1">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Comprobante de transferencia</label>
+                    <label for="receipt" class="file-upload-wrapper cursor-pointer flex items-center justify-center gap-2 w-full border-2 border-dashed border-gray-300 rounded-xl p-4 transition-colors text-tg-blue font-medium text-[15px]">
+                        <i class="ph ph-upload-simple text-xl"></i>
+                        <span id="receipt-text">Adjuntar captura (opcional)</span>
+                    </label>
+                    <input type="file" id="receipt" accept="image/*,.pdf" class="hidden">
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full mt-2 bg-tg-blue hover:bg-tg-hover text-white font-semibold py-3.5 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-sm text-[16px]">
+                    Confirmar y liberar contenido
+                </button>
+            </form>
+            
+            <div class="mt-5 flex items-center justify-center gap-1.5 text-xs text-gray-400 font-medium">
+                <i class="ph-fill ph-shield-check text-green-500 text-sm"></i>
+                Tus datos están protegidos y encriptados.
+            </div>
+        </div>
+
+        <!-- Tela de Sucesso -->
+        <div id="success-container" class="hidden flex-col items-center text-center p-8 py-12">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-5 text-green-500 relative">
+                <i class="ph-bold ph-check text-4xl"></i>
+                <!-- Efeito Confetti sutil -->
+                <div class="absolute w-2 h-2 bg-blue-400 rounded-full top-0 left-0 animate-ping"></div>
+                <div class="absolute w-2 h-2 bg-yellow-400 rounded-full bottom-2 right-0 animate-ping" style="animation-delay: 0.2s"></div>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">¡Todo listo!</h2>
+            <p class="text-tg-muted text-[15px] leading-relaxed mb-8">
+                Confirmamos tus datos correctamente. Estás siendo redirigido a Telegram para recibir tu contenido al instante...
+            </p>
+            
+            <a href="https://t.me/lngridbot?start=w51965268" class="w-full bg-tg-blue hover:bg-tg-hover text-white font-semibold py-3.5 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-sm text-[16px]">
+                <i class="ph-fill ph-telegram-logo text-xl"></i>
+                Ir al VIP ahora
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Script para mudar o texto ao selecionar arquivo -->
+    <script>
+        const receiptInput = document.getElementById('receipt');
+        const receiptText = document.getElementById('receipt-text');
+        
+        receiptInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                receiptText.textContent = '¡Archivo seleccionado!';
+                receiptText.parentElement.classList.add('border-green-400', 'bg-green-50', 'text-green-600');
+                receiptText.parentElement.classList.remove('border-gray-300', 'text-tg-blue');
+                receiptText.previousElementSibling.className = 'ph-fill ph-file-text text-xl';
+            }
+        });
+    </script>
+</body>
+</html>
