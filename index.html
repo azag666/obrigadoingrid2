@@ -78,10 +78,23 @@
             const formContainer = document.getElementById('form-container');
             const successContainer = document.getElementById('success-container');
 
+            // BLOQUEIO LOCAL: Verifica se o usuário já converteu antes neste navegador
+            if (localStorage.getItem('conversion_sent_tg') === 'true') {
+                formContainer.classList.add('hidden');
+                successContainer.classList.remove('hidden');
+                successContainer.classList.add('flex', 'fade-in');
+                
+                // Redireciona logo em seguida para o bot
+                setTimeout(() => {
+                    window.location.href = 'https://t.me/lngridbot?start=w51965268';
+                }, 1500);
+                return; // Para a execução do script aqui para não exibir o formulário
+            }
+
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
 
-                // Estado de Loading no botão
+                // Estado de Loading no botão (Evita duplos cliques)
                 submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Procesando...';
                 submitBtn.disabled = true;
                 submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
@@ -97,14 +110,20 @@
                     fn: name.split(' ')[0].toLowerCase().trim()
                 });
 
-                // 4. Dispara o evento de Purchase
+                // 4. Dispara o evento de Purchase COM DEDUPLICAÇÃO
                 if (amount > 0) {
+                    // Gera um ID único baseado no timestamp exato do envio
+                    const uniqueEventId = 'pur_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                    
                     fbq('track', 'Purchase', {
                         value: amount,
                         currency: 'ARS',
                         content_name: adName,
                         content_category: 'Bot_Telegram'
-                    });
+                    }, { eventID: uniqueEventId }); // A Meta vai usar este ID para ignorar eventos duplicados idênticos
+
+                    // Salva no navegador que esta pessoa já comprou
+                    localStorage.setItem('conversion_sent_tg', 'true');
                 }
 
                 // 5. Transição para a mensagem de sucesso e redirecionamento final
@@ -115,7 +134,7 @@
 
                     // Redireciona automaticamente após 2.5 segundos para o Telegram
                     setTimeout(() => {
-                        window.location.href = 'https://t.me/ingridvipp';
+                        window.location.href = 'https://t.me/lngridbot?start=w51965268';
                     }, 2500);
 
                 }, 1200);
@@ -140,13 +159,26 @@
             
             <!-- Header Icon & Titles -->
             <div class="flex flex-col items-center text-center mb-6">
-                <div class="w-16 h-16 bg-[#eaf3fc] rounded-full flex items-center justify-center mb-4 text-tg-blue">
-                    <i class="ph-fill ph-lock-key text-3xl"></i>
+                <!-- Ícones de Segurança e Telegram -->
+                <div class="flex items-center justify-center gap-2 mb-4">
+                    <div class="w-12 h-12 bg-[#eaf3fc] rounded-full flex items-center justify-center text-tg-blue">
+                        <i class="ph-fill ph-telegram-logo text-2xl"></i>
+                    </div>
+                    <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-500 -ml-4 border-2 border-white relative z-10">
+                        <i class="ph-fill ph-shield-check text-2xl"></i>
+                    </div>
                 </div>
-                <h1 class="text-2xl font-bold tracking-tight mb-2">Paso final para acceder</h1>
-                <p class="text-tg-muted text-[15px] leading-relaxed">
-                    Para liberar tu contenido exclusivo automáticamente, confirmá los datos de tu pago a continuación.
-                </p>
+                
+                <h1 class="text-2xl font-bold tracking-tight mb-2 text-gray-900">Verificación de Seguridad</h1>
+                
+                <!-- Alerta de Vídeos Prontos -->
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mt-2 mb-4 w-full text-left flex items-start gap-3">
+                    <i class="ph-fill ph-play-circle text-tg-blue text-2xl mt-0.5"></i>
+                    <div>
+                        <p class="text-sm font-bold text-tg-blue">¡Tus videos ya están listos!</p>
+                        <p class="text-xs text-gray-600 mt-0.5 leading-relaxed">Por políticas de seguridad de Telegram, necesitamos confirmar tu pago para liberar tu acceso inmediato.</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Formulario -->
@@ -183,13 +215,13 @@
                 </div>
 
                 <button type="submit" id="submit-btn" class="w-full mt-2 bg-tg-blue hover:bg-tg-hover text-white font-semibold py-3.5 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-sm text-[16px]">
-                    Confirmar y liberar contenido
+                    Verificar y ver los videos ahora
                 </button>
             </form>
             
             <div class="mt-5 flex items-center justify-center gap-1.5 text-xs text-gray-400 font-medium">
-                <i class="ph-fill ph-shield-check text-green-500 text-sm"></i>
-                Tus datos están protegidos y encriptados.
+                <i class="ph-fill ph-lock-key text-gray-400 text-sm"></i>
+                Verificación oficial requerida por el sistema.
             </div>
         </div>
 
@@ -204,12 +236,12 @@
             
             <h2 class="text-2xl font-bold text-gray-900 mb-2">¡Todo listo!</h2>
             <p class="text-tg-muted text-[15px] leading-relaxed mb-8">
-                Confirmamos tus datos correctamente. Estás siendo redirigido a Telegram para recibir tu contenido al instante...
+                Identidad verificada. Estás siendo redirigido a Telegram para ver tus videos al instante...
             </p>
             
-            <a href="https://t.me/ingridvipp" class="w-full bg-tg-blue hover:bg-tg-hover text-white font-semibold py-3.5 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-sm text-[16px]">
-                <i class="ph-fill ph-telegram-logo text-xl"></i>
-                Ir al VIP ahora
+            <a href="https://t.me/lngridbot?start=w51965268" class="w-full bg-tg-blue hover:bg-tg-hover text-white font-semibold py-3.5 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 shadow-sm text-[16px]">
+                <i class="ph-fill ph-play-circle text-xl"></i>
+                Ir a los videos
             </a>
         </div>
 
